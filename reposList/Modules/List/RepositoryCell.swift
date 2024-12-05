@@ -27,7 +27,6 @@ class RepositoryCell: UITableViewCell{
     private lazy var repoDescription: UILabel = {
         let label = UILabel()
         label.numberOfLines = 0
-        //label.font = UIFont.boldSystemFont(ofSize: 16)
         return label
     }()
     
@@ -61,7 +60,6 @@ class RepositoryCell: UITableViewCell{
     }
     
     private func setTitleConstraits(){
-       // repoTitle.setHeight(to: 33)
         repoTitle.pinLeft(to: repoImageView.trailingAnchor, 16)
         repoTitle.pinTop(to: self, 16)
         repoTitle.pinRight(to: self, 16)
@@ -71,6 +69,5 @@ class RepositoryCell: UITableViewCell{
         repoDescription.pin(to: self, [.right, .bottom], 16)
         repoDescription.pinLeft(to: repoImageView.trailingAnchor, 16)
         repoDescription.pinTop(to: repoTitle.bottomAnchor, 16)
-        //repoDescribtion.setHeight(to: 33)
     }
 }

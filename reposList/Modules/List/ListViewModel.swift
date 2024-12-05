@@ -24,6 +24,14 @@ final class ListViewModel: ObservableObject {
         if isPaginating {
             return
         }
+        do{
+            try reposFacade.configure()
+        } catch let error as RepositoryError {
+            errorMessage = error.description
+        } catch {
+            errorMessage = "Unexpected error: \(error)"
+        }
+        
         isPaginating = true
         Task {
             do {
@@ -59,4 +67,5 @@ final class ListViewModel: ObservableObject {
             errorMessage = "Unexpected error: \(error)"
         }
     }
+    
 }

@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 
-class ListViewController: UIViewController {
+final class ListViewController: UIViewController {
     
     private let viewModel: ListViewModel
     private var store: [AnyCancellable] = []
@@ -62,7 +62,9 @@ class ListViewController: UIViewController {
             let alertController = UIAlertController(title: "Error", message: errorMessage, preferredStyle: .alert)
             let okAction = UIAlertAction(title: "ОК", style: .default, handler: nil)
             alertController.addAction(okAction)
-            self?.present(alertController, animated: true, completion: nil)
+            DispatchQueue.main.async {
+                    self?.present(alertController, animated: true, completion: nil)
+                }
         }.store(in: &store)
         
         viewModel.fetchData()
@@ -88,22 +90,14 @@ class ListViewController: UIViewController {
 extension ListViewController: UITableViewDelegate, UITableViewDataSource, UIScrollViewDelegate{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return viewModel.repos.count
-        //return 10
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "RepositoryCell") as! RepositoryCell
-        print(viewModel.repos.count)
-        print(indexPath.row)
         let repo = viewModel.repos[indexPath.row]
         cell.set(repo: repo)
         return cell
     }
-    
-    /*func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let id = articles[indexPath.row].id
-        navigationController?.pushViewController(ArticleVC(id: id), animated: true)
-    }*/
     
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let deleteAction = UIContextualAction(style: .destructive, title: "delete") { _, _, completion in

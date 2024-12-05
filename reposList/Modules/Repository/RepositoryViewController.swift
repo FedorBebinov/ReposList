@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 
-class RepositoryViewController: UIViewController {
+final class RepositoryViewController: UIViewController {
     
     private let viewModel: RepositoryViewModel
     
@@ -70,7 +70,9 @@ class RepositoryViewController: UIViewController {
             let alertController = UIAlertController(title: "Error", message: errorMessage, preferredStyle: .alert)
             let okAction = UIAlertAction(title: "ОК", style: .default, handler: nil)
             alertController.addAction(okAction)
-            self?.present(alertController, animated: true, completion: nil)
+            DispatchQueue.main.async {
+                self?.present(alertController, animated: true, completion: nil)
+            }
         }.store(in: &store)
     }
     
@@ -100,7 +102,6 @@ class RepositoryViewController: UIViewController {
         repoDescription.pinLeft(to: view.leadingAnchor, 16)
         repoDescription.pinRight(to: view.trailingAnchor, 16)
         repoDescription.pinBottom(to: view.safeAreaLayoutGuide.bottomAnchor, 16)
-        //repoDescribtion.setHeight(to: 33)
     }
     
     @objc

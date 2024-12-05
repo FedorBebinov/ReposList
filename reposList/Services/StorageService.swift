@@ -14,17 +14,13 @@ protocol StorageServiceProtocol {
     func delete(index: Int) throws
     func deleteAll() throws
     func allRepos() throws -> [StoredRepositoryInfo]
+    func configure() throws
 }
 
-class StorageService: StorageServiceProtocol {
+final class StorageService: StorageServiceProtocol {
     
-    private let container: ModelContainer
-    private let context: ModelContext
-    
-    init() {
-        container = try! ModelContainer.init(for: StoredRepositoryInfo.self)
-        context = ModelContext(container)
-    }
+    private var container: ModelContainer!
+    private var context: ModelContext!
     
     func insert(repos: [RepositoryInfo]) {
         for repo in repos {
@@ -32,6 +28,15 @@ class StorageService: StorageServiceProtocol {
             context.insert(storedRepo)
         }
         
+    }
+    
+    func configure() throws {
+        do {
+            container = try ModelContainer.init(for: StoredRepositoryInfo.self)
+            context = ModelContext(container)
+        } catch {
+            throw RepositoryError.containerInitializationFailed("Failed to initialize")
+        }
     }
     
     func save() throws {

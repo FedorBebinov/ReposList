@@ -12,35 +12,40 @@ protocol ReposFacadeServiceProtocol {
     func save() throws
     func getLocalRepos() throws -> [StoredRepositoryInfo]
     func deleteRepo(index: Int) throws
+    func configure() throws
 }
 
-class ReposFacadeService: ReposFacadeServiceProtocol {
+final class ReposFacadeService: ReposFacadeServiceProtocol {
     private let networkService:NetworkServiceProtocol
-    private let strorageService: StorageServiceProtocol
+    private let storageService: StorageServiceProtocol
     
     init(networkService: NetworkServiceProtocol, strorageService: StorageServiceProtocol) {
         self.networkService = networkService
-        self.strorageService = strorageService
+        self.storageService = strorageService
     }
     
     func getRepos(page: Int) async throws -> [StoredRepositoryInfo] {
         let repos = try await networkService.getRepos(page: page)
         if page == 1 {
-            try strorageService.deleteAll()
+            try storageService.deleteAll()
         }
-        strorageService.insert(repos: repos)
-        return try strorageService.allRepos()
+        storageService.insert(repos: repos)
+        return try storageService.allRepos()
     }
     
     func save() throws {
-        try strorageService.save()
+        try storageService.save()
     }
     
     func getLocalRepos()throws -> [StoredRepositoryInfo] {
-        try strorageService.allRepos()
+        try storageService.allRepos()
     }
     
     func deleteRepo(index: Int) throws {
-        try strorageService.delete(index: index)
+        try storageService.delete(index: index)
+    }
+    
+    func configure() throws{
+        try storageService.configure()
     }
 }
