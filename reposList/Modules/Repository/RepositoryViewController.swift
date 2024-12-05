@@ -64,6 +64,9 @@ class RepositoryViewController: UIViewController {
         setData(repo: viewModel.repo)
         
         viewModel.$errorMessage.sink { [weak self] errorMessage in
+            guard let errorMessage else {
+                return
+            }
             let alertController = UIAlertController(title: "Error", message: errorMessage, preferredStyle: .alert)
             let okAction = UIAlertAction(title: "ОК", style: .default, handler: nil)
             alertController.addAction(okAction)

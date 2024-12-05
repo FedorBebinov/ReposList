@@ -9,7 +9,7 @@ import SwiftData
 
 @Model
 final class StoredRepositoryInfo {
-    var name: String
+    @Attribute(.unique) var name: String
     var avatarUrl: String
     var specification: String
 

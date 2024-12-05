@@ -56,6 +56,9 @@ class ListViewController: UIViewController {
         }.store(in: &store)
         
         viewModel.$errorMessage.sink { [weak self] errorMessage in
+            guard let errorMessage else {
+                return
+            }
             let alertController = UIAlertController(title: "Error", message: errorMessage, preferredStyle: .alert)
             let okAction = UIAlertAction(title: "ОК", style: .default, handler: nil)
             alertController.addAction(okAction)
@@ -67,7 +70,7 @@ class ListViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        viewModel.uploadData()
+        viewModel.refreshRepos()
     }
     
     
@@ -105,13 +108,13 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource, UIScro
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let deleteAction = UIContextualAction(style: .destructive, title: "delete") { _, _, completion in
             self.viewModel.deleteRepo(index: indexPath.row)
-            self.viewModel.uploadData() // ПОЧЕМУ БЕЗ ЭТОГО НЕ РАБОТАЕТ?
+            self.viewModel.refreshRepos() 
         }
         let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
         return configuration
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let repositoryVC = RepositoryModule.build(reposFacade: ServiceLocator.reposFacade, repo: self.viewModel.repos[indexPath.row], repoIndex: indexPath.row)
+        let repositoryVC = RepositoryModule.build(reposFacade: ServiceLocator.reposFacade, repo: self.viewModel.repos[indexPath.row])
         navigationController?.pushViewController(repositoryVC, animated: true)
     }
     

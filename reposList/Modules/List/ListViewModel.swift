@@ -14,7 +14,7 @@ final class ListViewModel: ObservableObject {
     private let reposFacade: ReposFacadeServiceProtocol
     @Published private(set) var repos: [StoredRepositoryInfo] = []
     @Published private(set) var isPaginating = false
-    @Published private(set) var errorMessage: String = ""
+    @Published private(set) var errorMessage: String?
     
     init(reposFacade: ReposFacadeServiceProtocol){
         self.reposFacade = reposFacade
@@ -35,11 +35,12 @@ final class ListViewModel: ObservableObject {
                 isPaginating = false
             } catch {
                 errorMessage = "Unexpected error: \(error)"
+                isPaginating = false
             }
         }
     }
     
-    func uploadData(){
+    func refreshRepos(){
         do{
             repos = try reposFacade.getLocalRepos()
         } catch let error as RepositoryError {

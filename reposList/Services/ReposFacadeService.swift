@@ -9,7 +9,7 @@ import Foundation
 
 protocol ReposFacadeServiceProtocol {
     func getRepos(page: Int) async throws -> [StoredRepositoryInfo]
-    func updateDescription(index: Int, descriptionText: String) throws
+    func save() throws
     func getLocalRepos() throws -> [StoredRepositoryInfo]
     func deleteRepo(index: Int) throws
 }
@@ -25,12 +25,15 @@ class ReposFacadeService: ReposFacadeServiceProtocol {
     
     func getRepos(page: Int) async throws -> [StoredRepositoryInfo] {
         let repos = try await networkService.getRepos(page: page)
-        strorageService.save(repos: repos)
+        if page == 1 {
+            try strorageService.deleteAll()
+        }
+        strorageService.insert(repos: repos)
         return try strorageService.allRepos()
     }
     
-    func updateDescription(index: Int, descriptionText: String) throws {
-        try strorageService.update(index: index, descriptionText: descriptionText)
+    func save() throws {
+        try strorageService.save()
     }
     
     func getLocalRepos()throws -> [StoredRepositoryInfo] {

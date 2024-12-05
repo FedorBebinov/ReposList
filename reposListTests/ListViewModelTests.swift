@@ -7,15 +7,18 @@
 
 import XCTest
 import Foundation
+@testable import reposList
 
-/*class MockReposFacadeService: ReposFacadeServiceProtocol {
+class MockReposFacadeService: ReposFacadeServiceProtocol {
+    
+    
     var mockRepos: [StoredRepositoryInfo] = []
     var shouldThrowError = false
     var fetchPage: Int = 1
 
     func getRepos(page: Int) async throws -> [StoredRepositoryInfo] {
         if shouldThrowError {
-            throw NSError(domain: "FetchError", code: 1, userInfo: nil)
+            throw RepositoryError.storageError("Can't get repo")
         }
         fetchPage = page
         return mockRepos
@@ -23,16 +26,20 @@ import Foundation
 
     func getLocalRepos() throws -> [StoredRepositoryInfo] {
         if shouldThrowError {
-            throw NSError(domain: "FetchError", code: 1, userInfo: nil)
+            throw RepositoryError.storageError("Can't get repo")
         }
         return mockRepos
     }
     
     func deleteRepo(index: Int) throws {
         if shouldThrowError {
-            throw NSError(domain: "DeleteError", code: 1, userInfo: nil)
+            throw RepositoryError.storageError("Delete error")
         }
         mockRepos.remove(at: index)
+    }
+    
+    func save() throws {
+        
     }
 }
 
@@ -55,11 +62,11 @@ final class ListViewModelTests: XCTestCase {
     
     func testFetchDataSuccess() async {
         // Установим мок данных
-        let expectedRepos = [StoredRepositoryInfo(id: 1, name: "Repo1"), StoredRepositoryInfo(id: 2, name: "Repo2")]
+        let expectedRepos = [StoredRepositoryInfo(name: "Repo1", avatarUrl: "url1", specification: "spec1"), StoredRepositoryInfo(name: "Repo2", avatarUrl: "url2", specification: "spec2")]
         mockService.mockRepos = expectedRepos
 
         // Вызовем метод fetchData
-        await viewModel.fetchData()
+        viewModel.fetchData()
 
         // Проверим, что repos обновились
         XCTAssertEqual(viewModel.repos, expectedRepos)
@@ -67,25 +74,22 @@ final class ListViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.isPaginating)
     }
 
-    func testUploadDataSuccess() {
+    func testRefreshReposSuccess() {
         // Установим мок данных
-        let expectedRepos = [StoredRepositoryInfo(id: 3, name: "Repo3")]
+        let expectedRepos = [StoredRepositoryInfo(name: "Repo1", avatarUrl: "url1", specification: "spec1")]
         mockService.mockRepos = expectedRepos
 
         // Вызовем метод uploadData
-        do {
-            try viewModel.uploadData()
-            XCTAssertEqual(viewModel.repos, expectedRepos)
-        } catch {
-            XCTFail("uploadData failed with error: \(error)")
-        }
+        viewModel.refreshRepos()
+        XCTAssertEqual(viewModel.repos, expectedRepos)
     }
 
     func testDeleteRepo() {
         // Установим мок данных
-        mockService.mockRepos = [StoredRepositoryInfo(id: 1, name: "Repo1"), StoredRepositoryInfo(id: 2, name: "Repo2")]
+        mockService.mockRepos = [StoredRepositoryInfo(name: "Repo1", avatarUrl: "url1", specification: "spec1"), StoredRepositoryInfo(name: "Repo2", avatarUrl: "url2", specification: "spec2")]
         
         // Вызовем метод deleteRepo
+        viewModel.fetchData()
         viewModel.deleteRepo(index: 0)
         
         // Проверим, что был удален правильный элемент
@@ -97,32 +101,34 @@ final class ListViewModelTests: XCTestCase {
         mockService.shouldThrowError = true
         
         // Вызовем метод fetchData
-        await viewModel.fetchData()
+        viewModel.fetchData()
         
         // Убедимся, что repos не обновился
         XCTAssertTrue(viewModel.repos.isEmpty)
-        XCTAssertFalse(viewModel.isPaginating)
+
     }
     
-    func testUploadDataError() {
+    func testRefreshReposError() {
         mockService.shouldThrowError = true
         
         // Вызовем метод uploadData
-        XCTAssertThrowsError(try viewModel.uploadData()) { error in
-            XCTAssertEqual((error as NSError).domain, "FetchError")
-        }
+        viewModel.refreshRepos()
+        XCTAssertEqual(viewModel.errorMessage, RepositoryError.storageError("Can't get repo").description)
     }
     
     func testDeleteRepoError() {
-        // Установим мок данных
-        mockService.mockRepos = [StoredRepositoryInfo(id: 1, name: "Repo1")]
-
-        // Установим флаг для генерации ошибки
         mockService.shouldThrowError = true
         
-        // Проверим, что метод deleteRepo вызывает ошибку
-        XCTAssertThrowsError(try viewModel.deleteRepo(index: 0)) { error in
-            XCTAssertEqual((error as NSError).domain, "DeleteError")
-        }
+        // Вызовем метод uploadData
+        viewModel.deleteRepo(index: 1)
+        XCTAssertEqual(viewModel.errorMessage, RepositoryError.storageError("Delete error").description)
     }
-}*/
+    
+    func testFetchdDataError() {
+        mockService.shouldThrowError = true
+        
+        // Вызовем метод uploadData
+        viewModel.fetchData()
+        XCTAssertEqual(viewModel.errorMessage, RepositoryError.storageError("Can't get repo").description)
+    }
+}

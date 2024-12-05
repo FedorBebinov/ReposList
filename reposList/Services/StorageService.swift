@@ -9,9 +9,10 @@ import Foundation
 import SwiftData
 
 protocol StorageServiceProtocol {
-    func save(repos: [RepositoryInfo])
-    func update(index: Int, descriptionText: String) throws
+    func insert(repos: [RepositoryInfo])
+    func save() throws
     func delete(index: Int) throws
+    func deleteAll() throws
     func allRepos() throws -> [StoredRepositoryInfo]
 }
 
@@ -25,7 +26,7 @@ class StorageService: StorageServiceProtocol {
         context = ModelContext(container)
     }
     
-    func save(repos: [RepositoryInfo]) {
+    func insert(repos: [RepositoryInfo]) {
         for repo in repos {
             let storedRepo = StoredRepositoryInfo(name: repo.name, avatarUrl: repo.owner.avatar_url, specification: repo.description)
             context.insert(storedRepo)
@@ -33,10 +34,7 @@ class StorageService: StorageServiceProtocol {
         
     }
     
-    func update(index: Int, descriptionText: String) throws {
-        let repos = try allRepos()
-        let repoToUpdate = repos[index]
-        repoToUpdate.specification = descriptionText
+    func save() throws {
         do {
             try context.save()
         } catch {
@@ -54,6 +52,10 @@ class StorageService: StorageServiceProtocol {
         } catch {
             throw RepositoryError.storageError("Failed to delete repository")
         }
+    }
+    
+    func deleteAll() throws {
+        try context.delete(model: StoredRepositoryInfo.self)
     }
     
     func allRepos() throws -> [StoredRepositoryInfo]{

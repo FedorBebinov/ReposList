@@ -8,7 +8,7 @@
 import UIKit
 
 struct RepositoryModule {
-    static func build(reposFacade: ReposFacadeServiceProtocol, repo: StoredRepositoryInfo, repoIndex: Int) -> UIViewController{
-        RepositoryViewController(viewModel: RepositoryViewModel(reposFacade: reposFacade, repo: repo, repoIndex: repoIndex))
+    static func build(reposFacade: ReposFacadeServiceProtocol, repo: StoredRepositoryInfo) -> UIViewController{
+        RepositoryViewController(viewModel: RepositoryViewModel(reposFacade: reposFacade, repo: repo))
     }
 }
